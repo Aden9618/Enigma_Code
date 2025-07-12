@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에니그마 시뮬레이터</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 에니그마 시뮬레이터</h1>
+            <p>제2차 세계대전 시대의 암호화 방법을 체험해 보세요</p>
+        </header>
+
+        <main>
+            <!-- 회전자 설명 추가 -->
+            <section class="rotor-info">
+                <h2>회전자(로터)란?</h2>
+                <ul>
+                    <li><strong>회전자 I:</strong> EKMFLGDQVZNTOWYHXUSPAIBRCJ 방식의 치환, 입력 시마다 한 칸 회전</li>
+                    <li><strong>회전자 II:</strong> AJDKSIRUXBLHWTMCQGZNPYFVOE 방식, I번이 한 바퀴 돌면 회전</li>
+                    <li><strong>회전자 III:</strong> BDFHJLCPRTXVZNYEIWGAKMUSQO 방식, II번이 한 바퀴 돌면 회전</li>
+                </ul>
+                <p>
+                    각 회전자는 입력마다 움직이며, 위치에 따라 문자 치환 방식이 달라집니다.<br>
+                    회전자의 초기 위치와 순서가 암호의 강력함을 결정합니다.
+                </p>
+            </section>
+
+            <!-- 회전자 상태 표시 -->
+            <section class="rotor-display">
+                <h2>회전자 상태</h2>
+                <div class="rotors">
+                    <div class="rotor">
+                        <label>회전자 I</label>
+                        <div class="rotor-position" id="rotor1">A</div>
+                    </div>
+                    <div class="rotor">
+                        <label>회전자 II</label>
+                        <div class="rotor-position" id="rotor2">A</div>
+                    </div>
+                    <div class="rotor">
+                        <label>회전자 III</label>
+                        <div class="rotor-position" id="rotor3">A</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 입력 영역 -->
+            <section class="input-section">
+                <h2>메시지 입력</h2>
+                <textarea id="inputText" placeholder="암호화할 메시지를 영어로 입력해 주세요..." rows="4"></textarea>
+                <div class="controls">
+                    <button id="encryptBtn" class="btn-primary">암호화</button>
+                    <button id="clearBtn" class="btn-secondary">초기화</button>
+                </div>
+            </section>
+
+            <!-- 출력 영역 -->
+            <section class="output-section">
+                <h2>암호화 결과</h2>
+                <textarea id="outputText" readonly rows="4"></textarea>
+                <button id="copyBtn" class="btn-copy">복사</button>
+            </section>
+
+            <!-- 설정 영역 -->
+            <section class="settings-section">
+                <h2>회전자 설정</h2>
+                <div class="setting-row">
+                    <label>회전자 I 위치:</label>
+                    <input type="range" id="rotor1Slider" min="0" max="25" value="0">
+                    <span id="rotor1Value">A</span>
+                </div>
+                <div class="setting-row">
+                    <label>회전자 II 위치:</label>
+                    <input type="range" id="rotor2Slider" min="0" max="25" value="0">
+                    <span id="rotor2Value">A</span>
+                </div>
+                <div class="setting-row">
+                    <label>회전자 III 위치:</label>
+                    <input type="range" id="rotor3Slider" min="0" max="25" value="0">
+                    <span id="rotor3Value">A</span>
+                </div>
+                <button id="resetBtn" class="btn-secondary">위치 초기화</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>실제 에니그마 머신의 작동 원리를 탐구하여 만든 시뮬레이터입니다.</p>
+        </footer>
+    </div>
+
+    <script src="enigma.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
