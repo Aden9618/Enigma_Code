@@ -1,97 +1,187 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>에니그마 시뮬레이터</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>에니그마 시뮬레이터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔐 에니그마 시뮬레이터</h1>
-            <p>제2차 세계대전 시대의 암호화 방법을 체험해 보세요</p>
-        </header>
+<div class="container">
 
-        <main>
-            <!-- 회전자 설명 추가 -->
-            <section class="rotor-info">
-                <h2>회전자(로터)란?</h2>
-                <ul>
-                    <li><strong>회전자 I:</strong> EKMFLGDQVZNTOWYHXUSPAIBRCJ 방식의 치환, 입력 시마다 한 칸 회전</li>
-                    <li><strong>회전자 II:</strong> AJDKSIRUXBLHWTMCQGZNPYFVOE 방식, I번이 한 바퀴 돌면 회전</li>
-                    <li><strong>회전자 III:</strong> BDFHJLCPRTXVZNYEIWGAKMUSQO 방식, II번이 한 바퀴 돌면 회전</li>
-                </ul>
-                <p>
-                    각 회전자는 입력마다 움직이며, 위치에 따라 문자 치환 방식이 달라집니다.<br>
-                    회전자의 초기 위치와 순서가 암호의 강력함을 결정합니다.
-                </p>
-            </section>
-
-            <!-- 회전자 상태 표시 -->
-            <section class="rotor-display">
-                <h2>회전자 상태</h2>
-                <div class="rotors">
-                    <div class="rotor">
-                        <label>회전자 I</label>
-                        <div class="rotor-position" id="rotor1">A</div>
-                    </div>
-                    <div class="rotor">
-                        <label>회전자 II</label>
-                        <div class="rotor-position" id="rotor2">A</div>
-                    </div>
-                    <div class="rotor">
-                        <label>회전자 III</label>
-                        <div class="rotor-position" id="rotor3">A</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 입력 영역 -->
-            <section class="input-section">
-                <h2>메시지 입력</h2>
-                <textarea id="inputText" placeholder="암호화할 메시지를 영어로 입력해 주세요..." rows="4"></textarea>
-                <div class="controls">
-                    <button id="encryptBtn" class="btn-primary">암호화</button>
-                    <button id="clearBtn" class="btn-secondary">초기화</button>
-                </div>
-            </section>
-
-            <!-- 출력 영역 -->
-            <section class="output-section">
-                <h2>암호화 결과</h2>
-                <textarea id="outputText" readonly rows="4"></textarea>
-                <button id="copyBtn" class="btn-copy">복사</button>
-            </section>
-
-            <!-- 설정 영역 -->
-            <section class="settings-section">
-                <h2>회전자 설정</h2>
-                <div class="setting-row">
-                    <label>회전자 I 위치:</label>
-                    <input type="range" id="rotor1Slider" min="0" max="25" value="0">
-                    <span id="rotor1Value">A</span>
-                </div>
-                <div class="setting-row">
-                    <label>회전자 II 위치:</label>
-                    <input type="range" id="rotor2Slider" min="0" max="25" value="0">
-                    <span id="rotor2Value">A</span>
-                </div>
-                <div class="setting-row">
-                    <label>회전자 III 위치:</label>
-                    <input type="range" id="rotor3Slider" min="0" max="25" value="0">
-                    <span id="rotor3Value">A</span>
-                </div>
-                <button id="resetBtn" class="btn-secondary">위치 초기화</button>
-            </section>
-        </main>
-
-        <footer>
-            <p>실제 에니그마 머신의 작동 원리를 탐구하여 만든 시뮬레이터입니다.</p>
-        </footer>
+  <nav class="nav-frame">
+    <div class="page-title">에니그마 시뮬레이터</div>
+    <div class="nav-buttons">
+      <button class="nav-btn active" id="nav-encrypt">암호화</button>
+      <button class="nav-btn" id="nav-help">도움말</button>
     </div>
+  </nav>
 
-    <script src="enigma.js"></script>
-    <script src="app.js"></script>
+  <main class="main-container">
+     <section class="page active" id="page-encrypt">
+      <div class="scrollable-content">
+        <section class="rotor-display">
+          <h3>회전자 상태</h3>
+          <div class="rotor-status">
+            <div class="rotor-item">
+              <div>회전자 I</div>
+              <div id="rotor1-letter" class="rotor-letter">A</div>
+            </div>
+            <div class="rotor-item">
+              <div>회전자 II</div>
+              <div id="rotor2-letter" class="rotor-letter">A</div>
+            </div>
+            <div class="rotor-item">
+              <div>회전자 III</div>
+              <div id="rotor3-letter" class="rotor-letter">A</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="input-section">
+          <h3>메시지 입력</h3>
+          <textarea id="input-msg" rows="4" placeholder="암호화할 메시지를 입력하세요"></textarea>
+          <div class="ctrl-buttons">
+            <button class="btn primary" id="encrypt-btn">실행</button>
+            <button class="btn secondary" id="clear-btn">입력초기화</button>
+          </div>
+        </section>
+
+        <section class="output-section">
+          <h3>암호화 결과</h3>
+          <textarea id="output-msg" rows="4" readonly placeholder="암호화 결과"></textarea>
+          <div class="ctrl-buttons">
+            <button class="btn info" id="copy-btn">결과 복사</button>
+          </div>
+        </section>
+
+        <section class="rotor-settings">
+          <h3>⚙️ 회전자 위치 설정</h3>
+          <div class="slider-container">
+            <div class="slider-item">
+              <label for="rotor1-slider">회전자 I</label>
+              <input id="rotor1-slider" type="range" min="0" max="25" value="0">
+              <span id="rotor1-slider-label">A</span>
+            </div>
+            <div class="slider-item">
+              <label for="rotor2-slider">회전자 II</label>
+              <input id="rotor2-slider" type="range" min="0" max="25" value="0">
+              <span id="rotor2-slider-label">A</span>
+            </div>
+            <div class="slider-item">
+              <label for="rotor3-slider">회전자 III</label>
+              <input id="rotor3-slider" type="range" min="0" max="25" value="0">
+              <span id="rotor3-slider-label">A</span>
+            </div>
+          </div>
+          <div class="setting-buttons">
+            <button class="btn warning" id="reset-btn">위치 초기화</button>
+            <button class="btn success" id="save-btn">설정 저장</button>
+          </div>
+        </section>
+
+        <section class="plugboard-settings">
+          <h3>🔌 플러그보드 설정</h3>
+          <div class="plugboard-info">A↔Q &nbsp;&nbsp; E↔J &nbsp;&nbsp; I↔V &nbsp;&nbsp; K↔W &nbsp;&nbsp; O↔Y</div>
+          <div class="plugboard-info">B↔D &nbsp;&nbsp; F↔X &nbsp;&nbsp; L↔U &nbsp;&nbsp; M↔T &nbsp;&nbsp; P↔S</div>
+          <div class="note">(실제 에니그마처럼 최대 13쌍까지 연결 가능, 현재 10쌍 사용)</div>
+        </section>
+
+        <section class="rotor-info">
+          <h3>📋 회전자 정보</h3>
+          <div class="info-content">
+            <pre>
+회전자 I:   EKMFLGDQVZNTOWYHXUSPAIBRCJ (턴오버: P)
+회전자 II:  AJDKSIRUXBLHWTMCQGZNPYFVOE (턴오버: E)
+회전자 III: BDFHJLCPRTXVZNYEIWGAKMUSQO (턴오버: V)
+리플렉터:   YRUHQSLDPXNGOKMIEBFZCWVJAT
+
+※ 실제 제2차 세계대전 당시 독일군이 사용한 에니그마 I 기계의 배선을 그대로 구현했습니다.
+            </pre>
+          </div>
+        </section>
+
+        <!-- 사용 안내 -->
+        <section class="usage-info">
+          <p>💡 같은 설정으로 암호화하면 원문이 복원됩니다.</p>
+          <p class="shortcuts">
+            단축키: Ctrl+Enter(암호화), Ctrl+R(초기화), Ctrl+C(복사), Ctrl+1/2(페이지), F1(도움말)
+          </p>
+        </section>
+      </div>
+    </section>
+
+    <section class="page" id="page-help">
+      <div class="scrollable-content help-content">
+        <h2>📚 에니그마 시뮬레이터 도움말</h2>
+
+        <div class="help-section">
+          <h3>🔍 에니그마란?</h3>
+          <p>에니그마는 제2차 세계대전 당시 독일군이 사용한 암호화 장치입니다.<br>
+          로터(회전자)라는 원판들이 회전하면서 글자를 치환하는 방식으로 작동합니다.<br>
+          매일 바뀌는 암호키(로터 순서, 시작 위치, 링세팅, 플러그보드 쌍, 리플렉터, 로터 위치) 때문에 해독이 매우 어려웠습니다.</p>
+        </div>
+        <div class="help-section">
+          <h3>⚙️ 작동 원리</h3>
+          <p>
+            1. 키를 누르면 로터들이 회전합니다 (오른쪽→중간→왼쪽 순서)<br>
+            2. 신호가 플러그보드→로터들→리플렉터를 거쳐 다시 돌아옵니다<br>
+            3. 리플렉터에서 반사된 신호가 역순으로 로터들과 플러그보드를 통과합니다<br>
+            4. 같은 글자라도 로터 위치에 따라 다른 암호문이 생성됩니다
+          </p>
+        </div>
+        <div class="help-section">
+          <h3>🎯 사용 방법</h3>
+          <p>
+            1. [암호화] 페이지에서 메시지를 입력합니다<br>
+            2. 로터 위치를 슬라이더로 조정할 수 있습니다<br>
+            3. '실행' 버튼을 눌러 결과를 확인합니다<br>
+            4. 같은 설정으로 암호문을 다시 입력하면 원문이 복원됩니다<br>
+            5. '결과 복사' 버튼으로 암호문을 클립보드에 복사할 수 있습니다
+          </p>
+        </div>
+        <div class="help-section">
+          <h3>⌨️ 키보드 단축키</h3>
+          <p>
+            • Ctrl + Enter: 암호화 실행<br>
+            • Ctrl + R: 로터 위치 초기화<br>
+            • Ctrl + C: 결과 복사<br>
+            • Ctrl + 1/2: 페이지 전환<br>
+            • F1: 도움말 페이지로 이동
+          </p>
+        </div>
+        <div class="help-section">
+          <h3>💡 알아두면 좋은 점</h3>
+          <p>
+            • 영어 대문자로 자동 변환되어 처리됩니다<br>
+            • 공백, 숫자, 문장부호는 그대로 유지됩니다<br>
+            • 로터 위치는 입력할 때마다 변경되므로 정확한 초기값이 중요합니다<br>
+            • 실제 에니그마 I 기계의 로터 배선과 턴오버를 정확히 구현했습니다<br>
+            • 더블 스테핑 메커니즘도 실제 에니그마처럼 작동합니다
+          </p>
+        </div>
+        <div class="help-section">
+          <h3>🔐 암호화 특징</h3>
+          <p>
+            • 대칭 암호화: 같은 설정으로 암호화하면 원문이 복원됩니다<br>
+            • 같은 글자도 위치에 따라 다르게 암호화됩니다<br>
+            • 자기 자신으로는 절대 암호화되지 않습니다 (리플렉터 특성)<br>
+            • 플러그보드 설정에 따라 추가적인 치환이 발생합니다
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 페이지 인디케이터 -->
+  <footer class="indicator-frame">
+    <div class="indicators">
+      <span class="indicator active" id="indicator-0">●</span>
+      <span class="indicator" id="indicator-1">●</span>
+    </div>
+  </footer>
+</div>
+<script src="enigma.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

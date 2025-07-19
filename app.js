@@ -1,250 +1,153 @@
-// 전역 변수
 let enigma = new EnigmaSimulator();
 
-// DOM 요소들
-const inputText = document.getElementById('inputText');
-const outputText = document.getElementById('outputText');
-const encryptBtn = document.getElementById('encryptBtn');
-const clearBtn = document.getElementById('clearBtn');
-const copyBtn = document.getElementById('copyBtn');
-const resetBtn = document.getElementById('resetBtn');
+let rotorPositions = [0, 0, 0];
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-const rotor1Display = document.getElementById('rotor1');
-const rotor2Display = document.getElementById('rotor2');
-const rotor3Display = document.getElementById('rotor3');
 
-const rotor1Slider = document.getElementById('rotor1Slider');
-const rotor2Slider = document.getElementById('rotor2Slider');
-const rotor3Slider = document.getElementById('rotor3Slider');
+const navEncrypt = document.getElementById('nav-encrypt');
+const navHelp = document.getElementById('nav-help');
+const pageEncrypt = document.getElementById('page-encrypt');
+const pageHelp = document.getElementById('page-help');
+const indicator0 = document.getElementById('indicator-0');
+const indicator1 = document.getElementById('indicator-1');
 
-const rotor1Value = document.getElementById('rotor1Value');
-const rotor2Value = document.getElementById('rotor2Value');
-const rotor3Value = document.getElementById('rotor3Value');
+// 로터 라벨/슬라이더/슬라이더라벨
+const rotorLetters = [
+  document.getElementById('rotor1-letter'),
+  document.getElementById('rotor2-letter'),
+  document.getElementById('rotor3-letter')
+];
+const rotorSliders = [
+  document.getElementById('rotor1-slider'),
+  document.getElementById('rotor2-slider'),
+  document.getElementById('rotor3-slider')
+];
+const rotorSliderLabels = [
+  document.getElementById('rotor1-slider-label'),
+  document.getElementById('rotor2-slider-label'),
+  document.getElementById('rotor3-slider-label')
+];
 
-// 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    updateRotorDisplay();
-    updateSliderValues();
-    attachEventListeners();
+
+const inputMsg = document.getElementById('input-msg');
+const outputMsg = document.getElementById('output-msg');
+const encryptBtn = document.getElementById('encrypt-btn');
+const clearBtn = document.getElementById('clear-btn');
+const copyBtn = document.getElementById('copy-btn');
+const resetBtn = document.getElementById('reset-btn');
+const saveBtn = document.getElementById('save-btn');
+
+
+function showPage(idx) {
+  if (idx === 0) {
+    pageEncrypt.classList.add('active');
+    pageHelp.classList.remove('active');
+    navEncrypt.classList.add('active');
+    navHelp.classList.remove('active');
+    indicator0.classList.add('active');
+    indicator1.classList.remove('active');
+  } else {
+    pageEncrypt.classList.remove('active');
+    pageHelp.classList.add('active');
+    navEncrypt.classList.remove('active');
+    navHelp.classList.add('active');
+    indicator0.classList.remove('active');
+    indicator1.classList.add('active');
+  }
+}
+
+// --- 로터 UI 업데이트 ---
+function updateRotorUI() {
+  for (let i = 0; i < 3; i++) {
+    let letter = alphabet[rotorPositions[i]];
+    rotorLetters[i].textContent = letter;
+    rotorSliderLabels[i].textContent = letter;
+    rotorSliders[i].value = rotorPositions[i];
+  }
+}
+
+// --- 로터 슬라이더 변경 ---
+for (let i = 0; i < 3; i++) {
+  rotorSliders[i].addEventListener('input', function (e) {
+    rotorPositions[i] = parseInt(e.target.value);
+    updateRotorUI();
+  });
+}
+
+// --- 암호화 ---
+encryptBtn.onclick = function () {
+  enigma.reset_rotors();
+  enigma.set_initial_position(...rotorPositions);
+  let plain = inputMsg.value;
+  let result = enigma.encrypt_message(plain);
+  outputMsg.value = result;
+  // 암호화 후 로터 상태 갱신
+  let pos = enigma.get_rotor_positions();
+  rotorPositions = pos;
+  updateRotorUI();
+};
+
+// --- 입력초기화 ---
+clearBtn.onclick = function () {
+  inputMsg.value = '';
+  outputMsg.value = '';
+};
+
+// --- 결과 복사 ---
+copyBtn.onclick = function () {
+  let out = outputMsg.value;
+  if (out) {
+    navigator.clipboard.writeText(out);
+    alert('암호문이 복사되었습니다!');
+  }
+};
+
+// --- 위치초기화 ---
+resetBtn.onclick = function () {
+  rotorPositions = [0, 0, 0];
+  enigma.reset_rotors();
+  updateRotorUI();
+};
+
+// --- 설정저장 (알림만) ---
+saveBtn.onclick = function () {
+  alert('로터 위치 설정이 저장되었습니다!');
+};
+
+// --- 네비게이션 ---
+navEncrypt.onclick = () => showPage(0);
+navHelp.onclick = () => showPage(1);
+indicator0.onclick = () => showPage(0);
+indicator1.onclick = () => showPage(1);
+
+// --- 단축키 (암호화/초기화/복사/페이지전환) ---
+document.addEventListener('keydown', function (e) {
+  if (e.ctrlKey && e.key === 'Enter') {
+    encryptBtn.click();
+    e.preventDefault();
+  }
+  if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
+    resetBtn.click();
+    e.preventDefault();
+  }
+  if (e.ctrlKey && (e.key === 'c' || e.key === 'C')) {
+    copyBtn.click();
+    e.preventDefault();
+  }
+  if (e.ctrlKey && e.key === '1') {
+    showPage(0);
+    e.preventDefault();
+  }
+  if (e.ctrlKey && e.key === '2') {
+    showPage(1);
+    e.preventDefault();
+  }
+  if (e.key === 'F1') {
+    showPage(1);
+    e.preventDefault();
+  }
 });
 
-function attachEventListeners() {
-    // 암호화 버튼
-    encryptBtn.addEventListener('click', encryptMessage);
-    
-    // 초기화 버튼
-    clearBtn.addEventListener('click', clearAll);
-    
-    // 복사 버튼
-    copyBtn.addEventListener('click', copyToClipboard);
-    
-    // 위치 초기화 버튼
-    resetBtn.addEventListener('click', resetRotorPositions);
-    
-    // 회전자 슬라이더
-    rotor1Slider.addEventListener('input', updateRotor1);
-    rotor2Slider.addEventListener('input', updateRotor2);
-    rotor3Slider.addEventListener('input', updateRotor3);
-    
-    // 엔터 키로 암호화
-    inputText.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            encryptMessage();
-        }
-    });
-}
-
-function encryptMessage() {
-    const message = inputText.value.trim();
-    if (!message) {
-        showToast('암호화할 메시지를 입력해주세요.', 'warning');
-        return;
-    }
-    
-    // 회전자 애니메이션 시작
-    animateRotors();
-    
-    // 암호화 실행 (각 문자마다 회전자 상태 업데이트)
-    let encrypted = '';
-    for (let i = 0; i < message.length; i++) {
-        const char = message[i];
-        const encryptedChar = enigma.encryptChar(char.toUpperCase());
-        encrypted += encryptedChar;
-        
-        // 각 문자 암호화 후 회전자 상태 업데이트
-        updateRotorDisplay();
-        updateSliderValues();
-        
-        // 시각적 효과를 위한 짧은 지연 (선택사항)
-        // await new Promise(resolve => setTimeout(resolve, 50));
-    }
-    
-    outputText.value = encrypted;
-    
-    // 최종 회전자 상태 업데이트
-    updateRotorDisplay();
-    updateSliderValues();
-    showToast('암호화가 완료되었습니다!', 'success');
-}
-
-function clearAll() {
-    inputText.value = '';
-    outputText.value = '';
-    showToast('입력이 초기화되었습니다.', 'info');
-}
-
-function copyToClipboard() {
-    if (!outputText.value) {
-        showToast('복사할 내용이 없습니다.', 'warning');
-        return;
-    }
-    
-    outputText.select();
-    document.execCommand('copy');
-    showToast('클립보드에 복사되었습니다!', 'success');
-}
-
-function resetRotorPositions() {
-    enigma.resetRotors();
-    rotor1Slider.value = 0;
-    rotor2Slider.value = 0;
-    rotor3Slider.value = 0;
-    updateRotorDisplay();
-    updateSliderValues();
-    showToast('회전자 위치가 초기화되었습니다.', 'info');
-}
-
-function updateRotor1() {
-    const pos = parseInt(rotor1Slider.value);
-    enigma.position1 = pos;
-    updateRotorDisplay();
-    updateSliderValues();
-}
-
-function updateRotor2() {
-    const pos = parseInt(rotor2Slider.value);
-    enigma.position2 = pos;
-    updateRotorDisplay();
-    updateSliderValues();
-}
-
-function updateRotor3() {
-    const pos = parseInt(rotor3Slider.value);
-    enigma.position3 = pos;
-    updateRotorDisplay();
-    updateSliderValues();
-}
-
-function updateRotorDisplay() {
-    const positions = enigma.getRotorPositions();
-    rotor1Display.textContent = enigma.positionToChar(positions[0]);
-    rotor2Display.textContent = enigma.positionToChar(positions[1]);
-    rotor3Display.textContent = enigma.positionToChar(positions[2]);
-}
-
-function updateSliderValues() {
-    const positions = enigma.getRotorPositions();
-    
-    // 슬라이더 값 업데이트
-    rotor1Slider.value = positions[0];
-    rotor2Slider.value = positions[1];
-    rotor3Slider.value = positions[2];
-    
-    // 슬라이더 옆 값 표시 업데이트
-    rotor1Value.textContent = enigma.positionToChar(positions[0]);
-    rotor2Value.textContent = enigma.positionToChar(positions[1]);
-    rotor3Value.textContent = enigma.positionToChar(positions[2]);
-}
-
-function animateRotors() {
-    rotor1Display.classList.add('spinning');
-    rotor2Display.classList.add('spinning');
-    rotor3Display.classList.add('spinning');
-    
-    setTimeout(() => {
-        rotor1Display.classList.remove('spinning');
-        rotor2Display.classList.remove('spinning');
-        rotor3Display.classList.remove('spinning');
-    }, 500);
-}
-
-function showToast(message, type = 'info') {
-    // 기존 토스트 제거
-    const existingToast = document.querySelector('.toast');
-    if (existingToast) {
-        existingToast.remove();
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    
-    // 타입별 색상 설정
-    switch(type) {
-        case 'success':
-            toast.style.background = '#27ae60';
-            break;
-        case 'warning':
-            toast.style.background = '#f39c12';
-            break;
-        case 'error':
-            toast.style.background = '#e74c3c';
-            break;
-        default:
-            toast.style.background = '#3498db';
-    }
-    
-    document.body.appendChild(toast);
-    
-    // 애니메이션으로 표시
-    setTimeout(() => toast.classList.add('show'), 100);
-    
-    // 3초 후 자동 제거
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 300);
-}
-
-// 실시간 회전자 움직임을 위한 고급 암호화 함수 (선택사항)
-async function encryptMessageWithAnimation() {
-    const message = inputText.value.trim();
-    if (!message) {
-        showToast('암호화할 메시지를 입력해주세요.', 'warning');
-        return;
-    }
-    
-    // 버튼 비활성화
-    encryptBtn.disabled = true;
-    encryptBtn.textContent = '암호화 중...';
-    
-    let encrypted = '';
-    
-    for (let i = 0; i < message.length; i++) {
-        const char = message[i];
-        
-        // 회전자 애니메이션
-        animateRotors();
-        
-        // 암호화 실행
-        const encryptedChar = enigma.encryptChar(char.toUpperCase());
-        encrypted += encryptedChar;
-        
-        // 회전자 상태 업데이트
-        updateRotorDisplay();
-        updateSliderValues();
-        
-        // 출력 텍스트 실시간 업데이트
-        outputText.value = encrypted;
-        
-        // 시각적 효과를 위한 지연
-        await new Promise(resolve => setTimeout(resolve, 200));
-    }
-    
-    // 버튼 활성화
-    encryptBtn.disabled = false;
-    encryptBtn.textContent = '암호화';
-    
-    showToast('암호화가 완료되었습니다!', 'success');
-}
+// --- 최초 초기화 ---
+showPage(0);
+updateRotorUI();

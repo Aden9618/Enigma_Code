@@ -1,122 +1,93 @@
-// 에니그마 시뮬레이터 클래스
 class EnigmaSimulator {
-    constructor() {
-        this.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        
-        // 실제 에니그마 I, II, III 회전자 배선
-        this.rotor1 = 'EKMFLGDQVZNTOWYHXUSPAIBRCJ';
-        this.rotor2 = 'AJDKSIRUXBLHWTMCQGZNPYFVOE';
-        this.rotor3 = 'BDFHJLCPRTXVZNYEIWGAKMUSQO';
-        
-        // 반사판 B
-        this.reflector = 'YRUHQSLDPXNGOKMIEBFZCWVJAT';
-        
-        // 회전자 위치 (0-25)
-        this.position1 = 0;
-        this.position2 = 0;
-        this.position3 = 0;
-        
-        // 회전자 턴오버 위치
-        this.turnover1 = 17; // R
-        this.turnover2 = 5;  // F
-        this.turnover3 = 22; // W
-        
-        // 플러그보드
-        this.plugboard = {
-            'A': 'B', 'B': 'A', 'C': 'D', 'D': 'C',
-            'E': 'F', 'F': 'E', 'G': 'H', 'H': 'G'
-        };
-    }
+  constructor() {
+    this.rotor1_wiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
+    this.rotor2_wiring = "AJDKSIRUXBLHWTMCQGZNPYFVOE";
+    this.rotor3_wiring = "BDFHJLCPRTXVZNYEIWGAKMUSQO";
+    this.reflector_wiring = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+    this.rotor1_turnover = 16;
+    this.rotor2_turnover = 4;
+    this.rotor3_turnover = 21;
 
-    plugboardSwap(char) {
-        return this.plugboard[char] || char;
-    }
+    this.plugboard = {'E': 'J', 'J': 'E','O': 'Y', 'Y': 'O','I': 'V', 'V': 'I', 'A': 'Q', 'Q': 'A','K': 'W', 'W': 'K','F': 'X', 'X': 'F','M': 'T', 'T': 'M','P': 'S', 'S': 'P','L': 'U', 'U': 'L','B': 'D', 'D': 'B'
+	} ;
+    this.reset_rotors();
+  }
 
-    rotorForward(char, rotor, position) {
-        const index = (this.alphabet.indexOf(char) + position) % 26;
-        return rotor[index];
-    }
+  reset_rotors() {
+    this.rotor1_pos = 0;
+    this.rotor2_pos = 0;
+    this.rotor3_pos = 0;
+  }
 
-    rotorBackward(char, rotor, position) {
-        const index = rotor.indexOf(char);
-        return this.alphabet[(index - position + 26) % 26];
-    }
+  set_initial_position(pos1, pos2, pos3) {
+    this.rotor1_pos = pos1;
+    this.rotor2_pos = pos2;
+    this.rotor3_pos = pos3;
+  }
 
-    reflect(char) {
-        const index = this.alphabet.indexOf(char);
-        return this.reflector[index];
-    }
+  get_rotor_positions() {
+    return [this.rotor1_pos, this.rotor2_pos, this.rotor3_pos];
+  }
 
-    rotateRotors() {
-        // 더블 스테핑 체크
-        if (this.position2 === this.turnover2) {
-            this.position2 = (this.position2 + 1) % 26;
-            this.position3 = (this.position3 + 1) % 26;
-        }
-        
-        // 일반 회전
-        if (this.position1 === this.turnover1) {
-            this.position2 = (this.position2 + 1) % 26;
-        }
-        
-        this.position1 = (this.position1 + 1) % 26;
+  step_rotors() {
+    if (this.rotor2_pos === this.rotor2_turnover) {
+      this.rotor2_pos = (this.rotor2_pos + 1) % 26;
+      this.rotor1_pos = (this.rotor1_pos + 1) % 26;
+    } else if (this.rotor3_pos === this.rotor3_turnover) {
+      this.rotor2_pos = (this.rotor2_pos + 1) % 26;
     }
+    this.rotor3_pos = (this.rotor3_pos + 1) % 26;
+  }
 
-    encryptChar(char) {
-        if (!this.alphabet.includes(char)) {
-            return char;
-        }
-        
-        // 회전자 회전
-        this.rotateRotors();
-        
-        // 1. 플러그보드 통과
-        char = this.plugboardSwap(char);
-        
-        // 2. 회전자 1, 2, 3 순서로 앞방향 통과
-        char = this.rotorForward(char, this.rotor1, this.position1);
-        char = this.rotorForward(char, this.rotor2, this.position2);
-        char = this.rotorForward(char, this.rotor3, this.position3);
-        
-        // 3. 반사판 통과
-        char = this.reflect(char);
-        
-        // 4. 회전자 3, 2, 1 순서로 뒷방향 통과
-        char = this.rotorBackward(char, this.rotor3, this.position3);
-        char = this.rotorBackward(char, this.rotor2, this.position2);
-        char = this.rotorBackward(char, this.rotor1, this.position1);
-        
-        // 5. 플러그보드 다시 통과
-        char = this.plugboardSwap(char);
-        
-        return char;
-    }
+  encrypt_char(char) {
+    if (!/^[A-Z]$/.test(char)) return char;
 
-    encryptMessage(message) {
-        let result = '';
-        for (let char of message.toUpperCase()) {
-            result += this.encryptChar(char);
-        }
-        return result;
-    }
+    this.step_rotors();
 
-    setInitialPosition(pos1, pos2, pos3) {
-        this.position1 = pos1;
-        this.position2 = pos2;
-        this.position3 = pos3;
-    }
+    char = this.plugboard[char] || char;
+    let char_index = char.charCodeAt(0) - 65;
 
-    resetRotors() {
-        this.position1 = 0;
-        this.position2 = 0;
-        this.position3 = 0;
-    }
+    char_index = (char_index + this.rotor3_pos) % 26;
+    char_index = this.rotor3_wiring.charCodeAt(char_index) - 65;
+    char_index = (char_index - this.rotor3_pos + 26) % 26;
 
-    getRotorPositions() {
-        return [this.position1, this.position2, this.position3];
-    }
+    char_index = (char_index + this.rotor2_pos) % 26;
+    char_index = this.rotor2_wiring.charCodeAt(char_index) - 65;
+    char_index = (char_index - this.rotor2_pos + 26) % 26;
 
-    positionToChar(position) {
-        return this.alphabet[position];
+    char_index = (char_index + this.rotor1_pos) % 26;
+    char_index = this.rotor1_wiring.charCodeAt(char_index) - 65;
+    char_index = (char_index - this.rotor1_pos + 26) % 26;
+
+    char_index = this.reflector_wiring.charCodeAt(char_index) - 65;
+
+    char_index = (char_index + this.rotor1_pos) % 26;
+    char_index = this.rotor1_wiring.indexOf(String.fromCharCode(char_index + 65));
+    char_index = (char_index - this.rotor1_pos + 26) % 26;
+
+    char_index = (char_index + this.rotor2_pos) % 26;
+    char_index = this.rotor2_wiring.indexOf(String.fromCharCode(char_index + 65));
+    char_index = (char_index - this.rotor2_pos + 26) % 26;
+
+    char_index = (char_index + this.rotor3_pos) % 26;
+    char_index = this.rotor3_wiring.indexOf(String.fromCharCode(char_index + 65));
+    char_index = (char_index - this.rotor3_pos + 26) % 26;
+
+    let out_char = String.fromCharCode(char_index + 65);
+    out_char = this.plugboard[out_char] || out_char;
+    return out_char;
+  }
+
+  encrypt_message(message) {
+    let result = '';
+    for (let i = 0; i < message.length; i++) {
+      let ch = message[i].toUpperCase();
+      if (ch >= 'A' && ch <= 'Z') {
+        result += this.encrypt_char(ch);
+      } else {
+        result += message[i]; // Keep spaces, numbers, etc.
+      }
     }
+    return result;
+  }
 }
